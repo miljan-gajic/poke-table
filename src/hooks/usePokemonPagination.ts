@@ -1,8 +1,8 @@
 'use client';
 
 import { PokemonApiResponse } from '@/types/pokemon';
-import { BASE_URL, PAGE_SIZE } from '@/utils/constants';
-import { useState, useEffect } from 'react';
+import { POKE_API_BASE_URL, PAGE_SIZE } from '@/utils/constants';
+import { useState } from 'react';
 
 const cache = new Map<string, PokemonApiResponse>();
 
@@ -11,7 +11,7 @@ export function usePokemonPagination(initialPage: PokemonApiResponse) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  cache.set(`${BASE_URL}?offset=0&limit=${PAGE_SIZE}`, initialPage)
+  cache.set(`${POKE_API_BASE_URL}?offset=0&limit=${PAGE_SIZE}`, initialPage)
 
   const fetchPage = async (url: string) => {
     if (cache.has(url)) {
