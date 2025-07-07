@@ -17,11 +17,19 @@ import { usePokemonPagination } from "@/hooks/usePokemonPagination";
 import { usePokemonFilter } from "@/hooks/usePokemonFilter";
 import { Modal } from "@/components/ui/modal/modal";
 
-type PokemonTableProps = {
+type PokemonTableProps<T> = {
   initialData: PokemonApiResponse;
+  columns: ColumnDef<T>[];
+  title: string;
+  filtering?: boolean;
 };
 
-export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
+export function PaginatedPokemonTable<T>({
+  initialData,
+  columns,
+  title,
+  filtering = true,
+}: PokemonTableProps<T>) {
   const [pageIndex, setPageIndex] = useState(0);
   const [filter, setFilter] = useState("");
 
@@ -38,16 +46,6 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
 
   const totalPages = Math.ceil(initialData.count / PAGE_SIZE);
 
-  const columns = useMemo<ColumnDef<Pokemon>[]>(
-    () => [
-      {
-        header: "Name",
-        accessorKey: "name",
-      },
-    ],
-    []
-  );
-
   const showCorrectTableDataSource = useMemo(() => {
     return (singlePokemonData as PokemonApiResponse)?.results?.length &&
       filter.length
@@ -56,7 +54,7 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
   }, [singlePokemonData, filter, data]);
 
   const table = useReactTable({
-    data: showCorrectTableDataSource,
+    data: showCorrectTableDataSource as T[],
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -66,7 +64,7 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
     [singlePokemonData]
   );
 
-  const handleRowClick = (rowData: Pokemon) => {
+  const handleRowClick = (rowData: T) => {
     setIsModalOpen(true);
     applyFilter(rowData.name, true);
   };
@@ -100,31 +98,33 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
 
   return (
     <div className="w-[100%]">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Pokémon Table</h2>
-        <div className="flex gap-4">
-          <input
-            type="text"
-            placeholder="Search by name"
-            className="px-4 py-2 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            value={filter}
-            onChange={handleSetFilter}
-          />
-          <button
-            onClick={handleFiltering}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!filter}
-          >
-            Filter
-          </button>
-          <button
-            onClick={handleClearFilter}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!filter}
-          >
-            Clear
-          </button>
-        </div>
+      <div className="flex justify-between items-center mb-4 mt-8">
+        <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+        {filtering && (
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="Search by name"
+              className="px-4 py-2 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={filter}
+              onChange={handleSetFilter}
+            />
+            <button
+              onClick={handleFiltering}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!filter}
+            >
+              Filter
+            </button>
+            <button
+              onClick={handleClearFilter}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!filter}
+            >
+              Clear
+            </button>
+          </div>
+        )}
       </div>
       <table className="min-w-full border-collapse border border-gray-200 rounded-lg overflow-hidden shadow-sm">
         <thead className="bg-gray-100">
@@ -186,7 +186,7 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
         </div>
       )}
       <Modal
-        isOpen={isModalOpen}
+        isOpen={isModalOpen && !filter.length}
         onClose={handleCloseModal}
         title={`${
           loading
@@ -200,7 +200,7 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
           <>
             <div className="flex items-start flex-col gap-2">
               <p className="font-bold">Abilities: </p>
-              {(singlePokemonData as SinglePokemonDetails)?.abilities.map(
+              {(singlePokemonData as SinglePokemonDetails)?.abilities?.map(
                 ({ ability }, idx) => (
                   <p key={idx}>{ability.name}</p>
                 )
@@ -208,7 +208,7 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
             </div>
             <div className="flex items-start flex-col gap-2 mt-2">
               <p className="font-bold">Stats: </p>
-              {(singlePokemonData as SinglePokemonDetails)?.stats.map(
+              {(singlePokemonData as SinglePokemonDetails)?.stats?.map(
                 ({ stat }, idx) => (
                   <p key={idx}>{stat.name}</p>
                 )
