@@ -35,6 +35,7 @@ export default async function Home() {
         initialData={evolutionInitialData}
         columns={columnsEvoTriggers}
         filtering={false}
+        rowClick={false}
       />
     </main>
   );

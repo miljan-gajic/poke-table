@@ -8,11 +8,10 @@ This project demonstrates the implementation of a paginated, filterable table of
 
 ## Features
 
-- **Server-Side Rendering (SSR)**: Initial data is fetched server-side using Next.js App Router
+- **Server-Side Rendering (SSR)**: Initial data is fetched server-side using Next.js App Router. Here the RSC were used instead of `getServerSideProps`
 - **Pagination**: Both tables support pagination with next/previous navigation
 - **Server-Side Filtering**: Filter Pokémon by name with server-side processing
 - **Interactive UI**: Click on any Pokémon row to view detailed information in a modal
-- **Responsive Design**: Clean, responsive interface using Tailwind CSS
 - **Data Caching**: Implementation of caching mechanisms to optimize API requests
 
 ## Technical Implementation
@@ -44,7 +43,7 @@ The main table component that handles pagination, filtering, and row interaction
 
 #### Modal
 
-A reusable modal component that displays detailed information about the selected Pokémon, including:
+A reusable modal component (semantic dialogue element) that displays detailed information about the selected Pokémon, including:
 
 - Pokémon abilities
 - Stats
@@ -59,16 +58,6 @@ The application employs several strategies for data fetching:
 3. **Filtering**: Server-side API route for filtering by Pokémon name
 4. **Detail Views**: Client-side fetching when a Pokémon is selected
 
-### Custom Hooks
-
-#### usePokemonPagination
-
-Manages the state and logic for paginating through the Pokémon API results, with built-in caching to avoid redundant network requests.
-
-#### usePokemonFilter
-
-Handles filtering functionality with caching and error handling for searching Pokémon by name.
-
 ### API Routes
 
 The project includes a custom API route for Pokémon filtering at `/api/pokemon-filter`, which provides:
@@ -79,20 +68,12 @@ The project includes a custom API route for Pokémon filtering at `/api/pokemon-
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js 18.17.0 or later
-
 ### Installation
 
 1. Clone the repository
 2. Install dependencies:
    ```
    npm install
-   # or
-   yarn
-   # or
-   pnpm install
    ```
 
 ### Running the Development Server
@@ -137,11 +118,8 @@ Pagination is implemented with a custom hook that manages state and API calls:
 
 ```typescript
 // src/hooks/usePokemonPagination.ts
-export function usePokemonPagination(
-  initialPage: PokemonApiResponse,
-) {
-  const [pageData, setPageData] =
-    useState<PokemonApiResponse>(initialPage);
+export function usePokemonPagination(initialPage: PokemonApiResponse) {
+  const [pageData, setPageData] = useState<PokemonApiResponse>(initialPage);
   // ... pagination logic
 }
 ```
@@ -165,17 +143,12 @@ When a user clicks on a table row, a modal is shown with detailed information:
 
 ```tsx
 // src/components/ui/modal/modal.tsx
-export function Modal({
-  isOpen,
-  onClose,
-  title,
-  children,
-}: ModalProps) {
+export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   // ... modal implementation
 }
 ```
 
-## Key Learning Points
+## Key Points
 
 - Implementation of server-side rendering with Next.js
 - Building paginated tables with TanStack Table
@@ -184,3 +157,24 @@ export function Modal({
 - Data caching strategies to optimize performance
 - Modal implementations for detail views
 - TypeScript for improved code reliability
+
+## Improvements if there was more time
+
+- Re-visit the idea of RSC and Container/Presentational pattern
+- Making the Table component truly generic and reusable
+  - right now the table just accepts some props in order to function properly for both use cases
+- Add full table loaders
+- Handle (better) Errors (both client and server)
+- Make the pagination separate element within the Table component
+  - use the compound components pattern to make the pagination and headers more reusable and separate the working logic
+- Filtering
+  - Add filters to URL params and keep them there. Basically leverage the search params and state
+- UI
+  - Modal: make the modal to better represent data for better UX
+  - Table: Responsive, add more details
+  - Filter/s: Standardise it and make it reusable
+  - Spinners for loading (full page, table, details)
+- Design
+  - Create a design system
+  - Create theming in Tailwind
+  - Create helpers that work with Tailwind and make it more readable / extendable (e.b. tailwindMerge etc...)

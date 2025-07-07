@@ -22,6 +22,7 @@ type PokemonTableProps<T> = {
   columns: ColumnDef<T>[];
   title: string;
   filtering?: boolean;
+  rowClick?: boolean;
 };
 
 export function PaginatedPokemonTable<T>({
@@ -29,6 +30,7 @@ export function PaginatedPokemonTable<T>({
   columns,
   title,
   filtering = true,
+  rowClick = true,
 }: PokemonTableProps<T>) {
   const [pageIndex, setPageIndex] = useState(0);
   const [filter, setFilter] = useState("");
@@ -64,9 +66,10 @@ export function PaginatedPokemonTable<T>({
     [singlePokemonData]
   );
 
-  const handleRowClick = (rowData: T) => {
+  const handleRowClick = (rowData: Record<string, unknown>) => {
+    if (!rowClick) return;
     setIsModalOpen(true);
-    applyFilter(rowData.name, true);
+    applyFilter(rowData.name as string, true);
   };
 
   const handleNextPage = () => {
@@ -150,7 +153,9 @@ export function PaginatedPokemonTable<T>({
             <tr
               key={row.id}
               className="cursor-pointer transition-colors duration-200 hover:bg-blue-50 active:bg-blue-100"
-              onClick={() => handleRowClick(row.original)}
+              onClick={() =>
+                handleRowClick(row.original as Record<string, unknown>)
+              }
             >
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id} className="px-6 py-4">
