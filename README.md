@@ -160,6 +160,8 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
 ## Improvements if there was more time
 
+- **Tests**
+  - Cover all important things with tests. Use `jest` with `RTL`
 - Re-visit the idea of RSC and Container/Presentational pattern
 - Making the Table component truly generic and reusable
   - right now the table just accepts some props in order to function properly for both use cases
