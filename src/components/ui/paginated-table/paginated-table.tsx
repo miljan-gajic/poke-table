@@ -8,9 +8,14 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { PAGE_SIZE } from "@/utils/constants";
-import { Pokemon, PokemonApiResponse } from "@/types/pokemon";
+import {
+  Pokemon,
+  PokemonApiResponse,
+  SinglePokemonDetails,
+} from "@/types/pokemon";
 import { usePokemonPagination } from "@/hooks/usePokemonPagination";
 import { usePokemonFilter } from "@/hooks/usePokemonFilter";
+import { Modal } from "@/components/ui/modal/modal";
 
 type PokemonTableProps = {
   initialData: PokemonApiResponse;
@@ -20,12 +25,15 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
   const [pageIndex, setPageIndex] = useState(0);
   const [filter, setFilter] = useState("");
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { data, goToNext, goToPrevious } = usePokemonPagination(initialData);
 
   const {
     data: singlePokemonData,
     applyFilter,
     clearFilter,
+    loading,
   } = usePokemonFilter();
 
   const totalPages = Math.ceil(initialData.count / PAGE_SIZE);
@@ -40,20 +48,27 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
     []
   );
 
+  const showCorrectTableDataSource = useMemo(() => {
+    return (singlePokemonData as PokemonApiResponse)?.results?.length &&
+      filter.length
+      ? (singlePokemonData as PokemonApiResponse)?.results
+      : data;
+  }, [singlePokemonData, filter, data]);
+
   const table = useReactTable({
-    data: singlePokemonData ?? data,
+    data: showCorrectTableDataSource,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
   const showPagination = useMemo(
-    () => !singlePokemonData?.length,
+    () => !(singlePokemonData as PokemonApiResponse)?.results?.length,
     [singlePokemonData]
   );
 
-  const handleRowClick = (rowData: any) => {
-    alert(`You clicked on row with ID: ${rowData.id}`);
-    // You can navigate or open modal etc.
+  const handleRowClick = (rowData: Pokemon) => {
+    setIsModalOpen(true);
+    applyFilter(rowData.name, true);
   };
 
   const handleNextPage = () => {
@@ -77,6 +92,10 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
 
   const handleSetFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -166,6 +185,38 @@ export function PaginatedPokemonTable({ initialData }: PokemonTableProps) {
           </div>
         </div>
       )}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title={`${
+          loading
+            ? "Loading "
+            : (singlePokemonData as SinglePokemonDetails)?.name
+        } Details:`}
+      >
+        {loading ? (
+          "Loading Details"
+        ) : (
+          <>
+            <div className="flex items-start flex-col gap-2">
+              <p className="font-bold">Abilities: </p>
+              {(singlePokemonData as SinglePokemonDetails)?.abilities.map(
+                ({ ability }, idx) => (
+                  <p key={idx}>{ability.name}</p>
+                )
+              )}
+            </div>
+            <div className="flex items-start flex-col gap-2 mt-2">
+              <p className="font-bold">Stats: </p>
+              {(singlePokemonData as SinglePokemonDetails)?.stats.map(
+                ({ stat }, idx) => (
+                  <p key={idx}>{stat.name}</p>
+                )
+              )}
+            </div>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

@@ -6,11 +6,11 @@ import { useState } from 'react';
 const filterCache = new Map<string, PokemonApiResponse>();
 
 export function usePokemonFilter() {
-  const [data, setData] = useState<PokemonApiResponse | null>(null);
+  const [data, setData] = useState<unknown | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const applyFilter = async (name: string) => {
+  const applyFilter = async (name: string, details?: boolean) => {
     setError(null);
 
     if (!name) {
@@ -25,8 +25,9 @@ export function usePokemonFilter() {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/pokemon-filter?name=${encodeURIComponent(name)}`);
+      const res = await fetch(`/api/pokemon-filter?name=${encodeURIComponent(name)}${details ? '&details=true' : ''}`);
       if (!res.ok) throw new Error('Pokémon not found');
+
       const result: PokemonApiResponse = await res.json();
 
       filterCache.set(name, result);
@@ -40,7 +41,7 @@ export function usePokemonFilter() {
   };
 
   return {
-    data: data?.results,
+    data: data,
     applyFilter,
     error,
     loading,

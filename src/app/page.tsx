@@ -1,4 +1,5 @@
-import { PaginatedPokemonTable } from "@/components/paginated-table/paginated-table";
+import { Modal } from "@/components/ui/modal/modal";
+import { PaginatedPokemonTable } from "@/components/ui/paginated-table/paginated-table";
 import { getPokemonPage } from "@/utils/getPokemons";
 
 export default async function Home() {

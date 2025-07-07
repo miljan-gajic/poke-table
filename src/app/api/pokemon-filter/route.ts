@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const name = searchParams.get('name');
+  const details = searchParams.get('details')
 
   if (!name) {
     return NextResponse.json(
@@ -22,6 +23,11 @@ export async function GET(req: NextRequest) {
     }
 
     const pokemon = await res.json();
+
+
+    if(details){
+      return NextResponse.json(pokemon)
+    }
 
     return NextResponse.json({
       count: 1,
